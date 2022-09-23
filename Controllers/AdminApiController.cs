@@ -1,7 +1,6 @@
 ﻿using System;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FlightPlanner.Controllers
 {
@@ -26,43 +25,30 @@ namespace FlightPlanner.Controllers
         [HttpPut]
         public IActionResult PutFlight(Flight flight)
         {
-            if (flight.From == null ||
-                flight.To == null ||
-                String.IsNullOrEmpty(flight.From.Country) ||
-                String.IsNullOrEmpty(flight.From.City) ||
-                String.IsNullOrEmpty(flight.From.AirportCode) ||
-                String.IsNullOrEmpty(flight.To.Country) ||
-                String.IsNullOrEmpty(flight.To.City) ||
-                String.IsNullOrEmpty(flight.To.AirportCode) ||
-                String.IsNullOrEmpty(flight.Carrier) ||
-                String.IsNullOrEmpty(flight.DepartureTime) ||
-                String.IsNullOrEmpty(flight.ArrivalTime))
+            if (Validate.HasNullValuesInFlight(flight) ||
+                Validate.HasIdenticalAirportsFromAndTo(flight) ||
+                Validate.DateTime(DateTime.Parse(flight.DepartureTime), DateTime.Parse(flight.ArrivalTime)))
             {
-                return BadRequest();
+                return BadRequest(flight);
             }
 
-            if (flight.From.Country.ToLower().Trim() == flight.To.Country.ToLower().Trim() &&
-                flight.From.City.ToLower().Trim() == flight.To.City.ToLower().Trim() &&
-                flight.From.AirportCode.ToLower().Trim() == flight.To.AirportCode.ToLower().Trim())
+            if (FlightStorage.IsDuplicate(flight))
             {
-                return BadRequest();
-            }
-
-            var departure = DateTime.Parse(flight.DepartureTime);
-            var arrival = DateTime.Parse(flight.ArrivalTime);
-
-            if(departure >= arrival)
-            {
-                return BadRequest();
-            }
-
-            if(FlightStorage.IsDuplicate(flight))
-            {
-                return Conflict();
+                return Conflict(flight);
             }
 
             flight = FlightStorage.AddFlight(flight);
+
             return Created("", flight);
+        }
+
+        [Route("flights/{id}")]
+        [HttpDelete]
+        public IActionResult DeleteFlight(int id)
+        {
+            FlightStorage.DeleteFlight(id);
+
+            return Ok();
         }
     }
 }
