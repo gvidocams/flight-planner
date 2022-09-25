@@ -11,15 +11,21 @@ namespace FlightPlanner
 
         public static Flight AddFlight(Flight flight)
         {
-            flight.Id = ++_id;
-            _flights.Add(flight);
+            lock (flightLock)
+            {
+                flight.Id = ++_id;
+                _flights.Add(flight);
 
-            return flight;
+                return flight;
+            }
         }
 
         public static Flight GetFlight(int id)
         {
-            return _flights.FirstOrDefault(f => f.Id == id);
+            lock (flightLock)
+            {
+                return _flights.FirstOrDefault(f => f.Id == id);
+            }
         }
 
         public static void DeleteFlight(int id)
@@ -39,61 +45,71 @@ namespace FlightPlanner
 
         public static void Clear()
         {
-            _flights.Clear();
-            _id = 0;
+            lock (flightLock)
+            {
+                _flights.Clear();
+                _id = 0;
+            }
         }
 
         public static bool IsDuplicate(Flight flight)
         {
-            foreach (Flight f in _flights)
+            lock (flightLock)
             {
-                if (f.From.Country == flight.From.Country &&
-                   f.From.City == flight.From.City &&
-                   f.From.AirportCode == flight.From.AirportCode &&
-                   f.To.Country == flight.To.Country &&
-                   f.To.City == flight.To.City &&
-                   f.To.AirportCode == flight.To.AirportCode &&
-                   f.Carrier == flight.Carrier &&
-                   f.DepartureTime == flight.DepartureTime &&
-                   f.ArrivalTime == flight.ArrivalTime)
+                foreach (Flight f in _flights)
                 {
-                    return true;
+                    if (f.From.Country == flight.From.Country &&
+                       f.From.City == flight.From.City &&
+                       f.From.AirportCode == flight.From.AirportCode &&
+                       f.To.Country == flight.To.Country &&
+                       f.To.City == flight.To.City &&
+                       f.To.AirportCode == flight.To.AirportCode &&
+                       f.Carrier == flight.Carrier &&
+                       f.DepartureTime == flight.DepartureTime &&
+                       f.ArrivalTime == flight.ArrivalTime)
+                    {
+                        return true;
+                    }
                 }
-            }
 
-            return false;
+                return false;
+            }
         }
 
         public static Airport[] FindAirports(string keyword)
         {
-            var searchedList = new List<Airport>();
-            var fixedKeyword = keyword.ToLower().Trim();
-
-            foreach (Flight f in _flights)
+            lock (flightLock)
             {
-                if (f.To.Country.ToLower().Contains(fixedKeyword) ||
-                    f.To.City.ToLower().Contains(fixedKeyword) ||
-                    f.To.AirportCode.ToLower().Contains(fixedKeyword))
+                var searchedList = new List<Airport>();
+                var fixedKeyword = keyword.ToLower().Trim();
+
+                foreach (Flight f in _flights)
                 {
-                    searchedList.Add(f.To);
+                    if (f.To.Country.ToLower().Contains(fixedKeyword) ||
+                        f.To.City.ToLower().Contains(fixedKeyword) ||
+                        f.To.AirportCode.ToLower().Contains(fixedKeyword))
+                    {
+                        searchedList.Add(f.To);
+                    }
+
+                    if (f.From.Country.ToLower().Contains(fixedKeyword) ||
+                        f.From.City.ToLower().Contains(fixedKeyword) ||
+                        f.From.AirportCode.ToLower().Contains(fixedKeyword))
+                    {
+                        searchedList.Add(f.From);
+                    }
                 }
 
-                if (f.From.Country.ToLower().Contains(fixedKeyword) ||
-                    f.From.City.ToLower().Contains(fixedKeyword) ||
-                    f.From.AirportCode.ToLower().Contains(fixedKeyword))
-                {
-                    searchedList.Add(f.From);
-                }
+                return searchedList.ToArray();
             }
-
-            return searchedList.ToArray();
         }
 
         public static Flight[] FindFlights(string from, string to)
         {
-            var flights = _flights.Where(flight => flight.From.AirportCode == from && flight.To.AirportCode == to);
-
-            return flights.ToArray();
+            lock (flightLock)
+            {
+                return _flights.Where(flight => flight.From.AirportCode == from && flight.To.AirportCode == to).ToArray();
+            }
         }
     }
 }
