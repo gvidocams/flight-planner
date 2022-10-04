@@ -1,4 +1,6 @@
-﻿namespace FlightPlanner
+﻿using System.Text.Json.Serialization;
+
+namespace FlightPlanner
 {
     public class Flight
     {

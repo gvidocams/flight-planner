@@ -33,7 +33,7 @@ namespace FlightPlanner
 
             services.AddDbContext<FlightPlannerDbContext>(options =>
             {
-                options.UseSqlite(Configuration.GetConnectionString("Flight-planner"));
+                options.UseSqlite("Filename=MyDatabase.db");
             });
             
         }
