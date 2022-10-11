@@ -23,7 +23,7 @@ namespace FlightPlanner.Controllers
         [HttpGet]
         public IActionResult GetFlight(int id)
         {
-            var flight = _flightService.GetById(id);
+            var flight = _flightService.GetCompleteFlightById(id);
 
             if (flight == null)
             {

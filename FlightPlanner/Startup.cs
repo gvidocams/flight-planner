@@ -35,9 +35,14 @@ namespace FlightPlanner
             services.AddAuthentication("BasicAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthorizationHandler>("BasicAuthentication", null);
 
+            // Test
+            var connectionString = Configuration.GetConnectionString("Flight-planner");
+
+
             services.AddDbContext<FlightPlannerDbContext>(options =>
             {
-                options.UseSqlite("Filename=MyDatabase.db");
+                //options.UseSqlite("Filename=MyDatabase.db");
+                options.UseSqlite(connectionString);
             });
             services.AddScoped<IDbService, DbService>();
             services.AddScoped<IEntityService<Airport>, EntityService<Airport>>();
