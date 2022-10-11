@@ -1,0 +1,17 @@
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\FlightPlanner.Services.csproj.AssemblyReference.cache
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\FlightPlanner.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\FlightPlanner.Services.AssemblyInfoInputs.cache
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\FlightPlanner.Services.AssemblyInfo.cs
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\FlightPlanner.Services.csproj.CoreCompileInputs.cache
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\bin\Debug\net5.0\FlightPlanner.Services.deps.json
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\bin\Debug\net5.0\FlightPlanner.Services.dll
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\bin\Debug\net5.0\FlightPlanner.Services.pdb
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\bin\Debug\net5.0\FlightPlanner.Core.dll
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\bin\Debug\net5.0\FlightPlanner.Data.dll
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\bin\Debug\net5.0\FlightPlanner.Core.pdb
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\bin\Debug\net5.0\FlightPlanner.Data.pdb
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\FlightPlanner.Services.csproj.CopyComplete
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\FlightPlanner.Services.dll
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\refint\FlightPlanner.Services.dll
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\FlightPlanner.Services.pdb
+C:\Users\Gvido\Desktop\Codelex\flight-planner\FlightPlanner.Services\obj\Debug\net5.0\ref\FlightPlanner.Services.dll
