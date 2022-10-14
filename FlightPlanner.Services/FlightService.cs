@@ -8,7 +8,7 @@ namespace FlightPlanner.Services
 {
     public class FlightService : EntityService<Flight>, IFlightService
     {
-        public FlightService(FlightPlannerDbContext context) : base(context)
+        public FlightService(IFlightPlannerDbContext context) : base(context)
         {
         }
 
@@ -18,6 +18,15 @@ namespace FlightPlanner.Services
                 .Include(f => f.From)
                 .Include(f => f.To)
                 .SingleOrDefault(f => f.Id == id);
+        }
+
+        public bool Exists(Flight flight)
+        {
+            return _context.Flights.Any(f => f.ArrivalTime == flight.ArrivalTime &&
+                                      f.DepartureTime == flight.DepartureTime &&
+                                      f.Carrier == flight.Carrier &&
+                                      f.From.AirportCode == flight.From.AirportCode &&
+                                      f.To.AirportCode == flight.To.AirportCode); 
         }
     }
 }

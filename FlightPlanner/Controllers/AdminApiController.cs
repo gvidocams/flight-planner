@@ -1,8 +1,13 @@
-﻿using FlightPlanner.Core.Models;
+﻿using System.Collections;
+using System.Collections.Generic;
+using FlightPlanner.Core.Models;
 using FlightPlanner.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using AutoMapper;
+using FlightPlanner.Core.Validations;
+using FlightPlanner.Models;
 
 namespace FlightPlanner.Controllers
 {
@@ -10,13 +15,20 @@ namespace FlightPlanner.Controllers
     [ApiController, Authorize]
     public class AdminApiController : ControllerBase
     {
-        private static readonly object dbLock = new object();
-
         private readonly IFlightService _flightService;
+        private readonly IEnumerable<IFlightValidator> _flightValidators;
+        private readonly IEnumerable<IAirportValidator> _airportValidators;
+        private readonly IMapper _mapper;
 
-        public AdminApiController(IFlightService flightService)
+        public AdminApiController(IFlightService flightService, 
+            IEnumerable<IAirportValidator> airportValidators, 
+            IEnumerable<IFlightValidator> flightValidators,
+            IMapper mapper)
         {
             _flightService = flightService;
+            _airportValidators = airportValidators;
+            _flightValidators = flightValidators;
+            _mapper = mapper;
         }
 
         [Route("flights/{id}")]
@@ -30,29 +42,33 @@ namespace FlightPlanner.Controllers
                 return NotFound();
             }
 
-            return Ok(flight);
+            var response = _mapper.Map<FlightRequest>(flight);
+
+            return Ok(response);
 
         }
 
         [Route("flights")]
         [HttpPut]
-        public IActionResult PutFlight(Flight flight)
+        public IActionResult PutFlight(FlightRequest request)
         {
-            /*
-            if (Validate.IsValidFlight(flight))
+            var flight = _mapper.Map<Flight>(request);
+            if (!_flightValidators.All(f => f.IsValid(flight)) ||
+                !_airportValidators.All(a => a.IsValid(flight?.From)) ||
+                !_airportValidators.All(a => a.IsValid(flight?.To)))
             {
-                return BadRequest(flight);
+                return BadRequest(request);
             }
-            */
-            /*
-            if (Validate.IsDuplicateFlight(flights, flight))
+            
+            if (_flightService.Exists(flight))
             {
-                return Conflict(flight);
+                return Conflict(request);
             }
-            */
-            _flightService.Create(flight);
-            return Created("", flight);
 
+            _flightService.Create(flight);
+            request = _mapper.Map<FlightRequest>(flight);
+
+            return Created("", request);
         }
 
         [Route("flights/{id}")]

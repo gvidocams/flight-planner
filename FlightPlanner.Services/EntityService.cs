@@ -8,7 +8,7 @@ namespace FlightPlanner.Services
 {
     public class EntityService<T> : DbService, IEntityService<T> where T : Entity
     {
-        public EntityService(FlightPlannerDbContext context) : base(context)
+        public EntityService(IFlightPlannerDbContext context) : base(context)
         {
         }
 

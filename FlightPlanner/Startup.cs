@@ -1,9 +1,10 @@
+using AutoMapper;
 using FlightPlanner.Core.Models;
 using FlightPlanner.Core.Services;
+using FlightPlanner.Core.Validations;
 using FlightPlanner.Data;
 using FlightPlanner.Filters;
 using FlightPlanner.Services;
-using FluentAssertions.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,20 +35,25 @@ namespace FlightPlanner
             });
             services.AddAuthentication("BasicAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthorizationHandler>("BasicAuthentication", null);
-
-            // Test
+            
             var connectionString = Configuration.GetConnectionString("Flight-planner");
-
-
+            
             services.AddDbContext<FlightPlannerDbContext>(options =>
             {
-                //options.UseSqlite("Filename=MyDatabase.db");
                 options.UseSqlite(connectionString);
             });
+            services.AddScoped<IFlightPlannerDbContext, FlightPlannerDbContext>();
             services.AddScoped<IDbService, DbService>();
             services.AddScoped<IEntityService<Airport>, EntityService<Airport>>();
             services.AddScoped<IEntityService<Flight>, EntityService<Flight>>();
             services.AddScoped<IFlightService, FlightService>();
+            services.AddScoped<IFlightValidator, CarrierValidator>();
+            services.AddScoped<IFlightValidator, FlightTimeValidator>();
+            services.AddScoped<IFlightValidator, FlightAirportValidator>();
+            services.AddScoped<IAirportValidator, AirportCountryValidator>();
+            services.AddScoped<IAirportValidator, AirportCityValidator>();
+            services.AddScoped<IAirportValidator, AirportCodeValidator>();
+            services.AddSingleton<IMapper>(AutoMapperConfig.CreateMapper());
         }
 
         
