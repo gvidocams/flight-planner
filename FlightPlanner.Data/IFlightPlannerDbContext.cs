@@ -11,6 +11,7 @@ namespace FlightPlanner.Data
         EntityEntry<T> Entry<T>(T entity) where T : class;
         DbSet<Flight> Flights { get; set; }
         DbSet<Airport> Airports { get; set; }
+        DbSet<User> Users { get; set; }
         int SaveChanges();
         Task<int> SaveChangesAsync();
     }

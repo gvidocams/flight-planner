@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using FlightPlanner.Core.Models;
+using FlightPlanner.Core.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,9 +17,14 @@ namespace FlightPlanner.Filters
 {
     public class BasicAuthorizationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        public BasicAuthorizationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        private readonly IEntityService<User> _userService;
+
+        public BasicAuthorizationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger,
+            UrlEncoder encoder, ISystemClock clock, IEntityService<User> userService)
             : base(options, logger, encoder, clock)
-        { }
+        {
+            _userService = userService;
+        }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
@@ -34,8 +42,9 @@ namespace FlightPlanner.Filters
                 var credentialBytes = Convert.FromBase64String(authHeader.Parameter);
                 var credentials = Encoding.UTF8.GetString(credentialBytes).Split(new[] { ':' }, 2);
                 var username = credentials[0];
-                var password = credentials[1];
-                authorized = (username == "codelex-admin" && password == "Password123");
+                var password = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials[1].ToCharArray()));
+
+                authorized = _userService.Query().Any(u => u.UserName == username && u.Password == password);
             }
             catch
             {
