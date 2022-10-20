@@ -2,7 +2,7 @@
 
 namespace FlightPlanner.Data.Migrations
 {
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,6 +19,20 @@ namespace FlightPlanner.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Airports", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserName = table.Column<string>(type: "TEXT", nullable: true),
+                    Password = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -59,12 +73,19 @@ namespace FlightPlanner.Data.Migrations
                 name: "IX_Flights_ToId",
                 table: "Flights",
                 column: "ToId");
+
+            migrationBuilder.InsertData(
+                "Users", columns: new[] { "UserName", "Password" },
+                values: new object[] { "codelex-admin", "UGFzc3dvcmQxMjM=" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "Flights");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Airports");

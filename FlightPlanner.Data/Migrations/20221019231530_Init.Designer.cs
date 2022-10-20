@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlightPlanner.Data.Migrations
 {
     [DbContext(typeof(FlightPlannerDbContext))]
-    [Migration("20221012212942_init")]
-    partial class init
+    [Migration("20221019231530_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -66,6 +66,23 @@ namespace FlightPlanner.Data.Migrations
                     b.HasIndex("ToId");
 
                     b.ToTable("Flights");
+                });
+
+            modelBuilder.Entity("FlightPlanner.Core.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("FlightPlanner.Core.Models.Flight", b =>

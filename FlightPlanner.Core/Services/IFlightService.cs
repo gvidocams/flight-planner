@@ -1,4 +1,5 @@
-﻿using FlightPlanner.Core.Models;
+﻿using System.Collections.Generic;
+using FlightPlanner.Core.Models;
 
 namespace FlightPlanner.Core.Services
 {
@@ -6,5 +7,6 @@ namespace FlightPlanner.Core.Services
     {
         Flight GetCompleteFlightById(int id);
         bool Exists(Flight flight);
+        List<Flight> GetFlights(string from, string to, string departureDate);
     }
 }

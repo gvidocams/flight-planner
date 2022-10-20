@@ -15,6 +15,7 @@ namespace FlightPlanner.Controllers
     [ApiController, Authorize]
     public class AdminApiController : ControllerBase
     {
+        private static readonly object dbLock = new object();
         private readonly IFlightService _flightService;
         private readonly IEnumerable<IFlightValidator> _flightValidators;
         private readonly IEnumerable<IAirportValidator> _airportValidators;
@@ -52,50 +53,56 @@ namespace FlightPlanner.Controllers
         [HttpPut]
         public IActionResult PutFlight(FlightRequest request)
         {
-            var flight = _mapper.Map<Flight>(request);
-            if (!_flightValidators.All(f => f.IsValid(flight)) ||
-                !_airportValidators.All(a => a.IsValid(flight?.From)) ||
-                !_airportValidators.All(a => a.IsValid(flight?.To)))
+            lock (dbLock)
             {
-                return BadRequest(request);
+                var flight = _mapper.Map<Flight>(request);
+                if (!_flightValidators.All(f => f.IsValid(flight)) ||
+                    !_airportValidators.All(a => a.IsValid(flight?.From)) ||
+                    !_airportValidators.All(a => a.IsValid(flight?.To)))
+                {
+                    return BadRequest(request);
+                }
+
+                if (_flightService.Exists(flight))
+                {
+                    return Conflict(request);
+                }
+
+                var result = _flightService.Create(flight);
+
+                if (result.Success)
+                {
+                    request = _mapper.Map<FlightRequest>(flight);
+
+                    return Created("", request);
+                }
+
+                return Problem(result.FormatErrors);
             }
-            
-            if (_flightService.Exists(flight))
-            {
-                return Conflict(request);
-            }
-
-            var result = _flightService.Create(flight);
-
-            if (result.Success)
-            {
-                request = _mapper.Map<FlightRequest>(flight);
-
-                return Created("", request);
-            }
-
-            return Problem(result.FormatErrors);
         }
 
         [Route("flights/{id}")]
         [HttpDelete]
         public IActionResult DeleteFlight(int id)
         {
-            var flight = _flightService.GetById(id);
-
-            if (flight != null)
+            lock (dbLock)
             {
-                var result = _flightService.Delete(flight);
+                var flight = _flightService.GetById(id);
 
-                if (result.Success)
+                if (flight != null)
                 {
-                    return Ok();
+                    var result = _flightService.Delete(flight);
+
+                    if (result.Success)
+                    {
+                        return Ok();
+                    }
+
+                    return Problem(result.FormatErrors);
                 }
 
-                return Problem(result.FormatErrors);
+                return Ok();
             }
-
-            return Ok();
         }
     }
 }

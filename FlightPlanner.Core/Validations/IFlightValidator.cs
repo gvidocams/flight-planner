@@ -4,6 +4,6 @@ namespace FlightPlanner.Core.Validations
 {
     public interface IFlightValidator
     {
-        public bool IsValid(Flight flight);
+        bool IsValid(Flight flight);
     }
 }

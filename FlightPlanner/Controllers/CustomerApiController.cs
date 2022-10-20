@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AutoMapper;
 using FlightPlanner.Core.Models;
-using FlightPlanner.Data;
+using FlightPlanner.Core.Services;
+using FlightPlanner.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlanner.Controllers
 {
@@ -12,66 +11,54 @@ namespace FlightPlanner.Controllers
     public class CustomerApiController : ControllerBase
     {
         private static readonly object dbLock = new object();
-        private readonly FlightPlannerDbContext _context;
+        private IFlightService _flightService;
+        private IAirportService _airportService;
+        private IMapper _mapper;
 
-        public CustomerApiController(FlightPlannerDbContext context)
+        public CustomerApiController(
+            IFlightService flightService,
+            IAirportService airportService,
+            IMapper mapper)
         {
-            _context = context;
+            _flightService = flightService;
+            _airportService = airportService;
+            _mapper = mapper;
         }
 
         [Route("airports")]
         [HttpGet]
         public IActionResult GetAirports(string search)
         {
-            var searchedList = new List<Airport>();
-            var fixedKeyword = search.ToLower().Trim();
+            var airports = _airportService.SearchAirports(search);
 
-            var flights = _context.Flights
-                .Include(f => f.From)
-                .Include(f => f.To)
-                .ToList();
+            var response = airports.ConvertAll(a => _mapper.Map<AirportRequest>(a)).ToArray();
 
-            foreach (Flight f in flights)
-            {
-                if (f.To.Country.ToLower().Contains(fixedKeyword) ||
-                    f.To.City.ToLower().Contains(fixedKeyword) ||
-                    f.To.AirportCode.ToLower().Contains(fixedKeyword))
-                {
-                    searchedList.Add(f.To);
-                }
-
-                if (f.From.Country.ToLower().Contains(fixedKeyword) ||
-                    f.From.City.ToLower().Contains(fixedKeyword) ||
-                    f.From.AirportCode.ToLower().Contains(fixedKeyword))
-                {
-                    searchedList.Add(f.From);
-                }
-            }
-
-            return Ok(searchedList.ToArray());
+            return Ok(response);
         }
 
         [Route("flights/search")]
         [HttpPost]
         public IActionResult GetFlights(FlightSearchRequest req)
         {
-            if (req.From == req.To)
-            {
-                return BadRequest();
-            }
-
             lock (dbLock)
             {
-                var flights = _context.Flights
-                    .Include(f => f.From)
-                    .Include(f => f.To)
-                    .ToList()
-                    .Where(f => f.From.AirportCode == req.From && f.To.AirportCode == req.To)
-                    .ToArray();
+                if (req.From == req.To)
+                {
+                    return BadRequest();
+                }
 
-                var result = new FlightSearchResult() { page = 0, totalItems = flights.Length, items = flights };
+                var flights = _flightService.GetFlights(req.From, req.To, req.DepartureDate);
 
-                return Ok(result);
+                var mappedFlights = flights.ConvertAll(f => _mapper.Map<FlightRequest>(f));
+
+                var response = new FlightSearchResponse()
+                {
+                    page = 0,
+                    totalItems = mappedFlights.Count,
+                    items = mappedFlights.ToArray()
+                };
+
+                return Ok(response);
             }
         }
 
@@ -79,17 +66,16 @@ namespace FlightPlanner.Controllers
         [HttpGet]
         public IActionResult GetFlightById(int id)
         {
-            var flight = _context.Flights
-            .Include(f => f.From)
-            .Include(f => f.To)
-            .FirstOrDefault(f => f.Id == id);
+            var flight = _flightService.GetCompleteFlightById(id);
 
             if (flight == null)
             {
                 return NotFound();
             }
 
-            return Ok(flight);
+            var response = _mapper.Map<FlightRequest>(flight);
+
+            return Ok(response);
         }
     }
 }
